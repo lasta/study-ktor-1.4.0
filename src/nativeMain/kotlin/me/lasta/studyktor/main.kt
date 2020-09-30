@@ -10,6 +10,7 @@ import io.ktor.utils.io.core.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.system.exitProcess
 
 @Serializable
 data class UserArticle(
@@ -39,12 +40,24 @@ fun main() = runBlocking {
             https { serverName = "study.lasta.me" }
         }
     }
+    cioClient.use { client ->
+        val userArticle: UserArticle = try {
+            // https://jsonplaceholder.typicode.com/
+            client.get("http://jsonplaceholder.typicode.com/posts/1")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            exitProcess(1)
+        }
+        println(Json.encodeToString(UserArticle.serializer(), userArticle))
 
-    val userArticle: UserArticle = cioClient.use { client ->
-        // https://jsonplaceholder.typicode.com/
-        client.get("http://jsonplaceholder.typicode.com/posts/1")
+        val userArticleHttps: UserArticle = try {
+            client.get("https://jsonplaceholder.typicode.com/posts/1")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            exitProcess(1)
+        }
+        println(Json.encodeToString(UserArticle.serializer(), userArticleHttps))
     }
-    println(Json.encodeToString(UserArticle.serializer(), userArticle))
 }
 
 
