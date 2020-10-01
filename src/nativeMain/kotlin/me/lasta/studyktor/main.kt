@@ -62,9 +62,11 @@ suspend fun withCurlClient() {
 
 suspend fun test(client: HttpClient) {
     // HTTP
+    val httpUrl = "http://jsonplaceholder.typicode.com/posts/1"
+    println("Test to request: $httpUrl")
     val userArticle: UserArticle = try {
         // https://jsonplaceholder.typicode.com/
-        client.get("http://jsonplaceholder.typicode.com/posts/1")
+        client.get(httpUrl)
     } catch (e: Exception) {
         e.printStackTrace()
         exitProcess(1)
@@ -72,8 +74,10 @@ suspend fun test(client: HttpClient) {
     println(Json.encodeToString(UserArticle.serializer(), userArticle))
 
     // HTTPS
+    val httpsUrl = "https://jsonplaceholder.typicode.com/posts/1"
+    println("Test to request $httpsUrl")
     val userArticleHttps: UserArticle = try {
-        client.get("https://jsonplaceholder.typicode.com/posts/1")
+        client.get(httpsUrl)
     } catch (e: Exception) {
         e.printStackTrace()
         exitProcess(1)
