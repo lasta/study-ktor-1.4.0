@@ -2,6 +2,7 @@ package me.lasta.studyktor
 
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.curl.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
@@ -22,9 +23,14 @@ data class UserArticle(
 
 @KtorExperimentalAPI
 fun main() = runBlocking {
+//    withCioClient()
+    withCurlClient()
+}
 
+@KtorExperimentalAPI
+suspend fun withCioClient() {
     // https://ktor.io/docs/http-client-engines.html
-    val cioClient = HttpClient(CIO) {
+    val client = HttpClient(CIO) {
         install(JsonFeature) {
             serializer = KotlinxSerializer()
         }
@@ -40,24 +46,37 @@ fun main() = runBlocking {
             https { serverName = "study.lasta.me" }
         }
     }
-    cioClient.use { client ->
-        val userArticle: UserArticle = try {
-            // https://jsonplaceholder.typicode.com/
-            client.get("http://jsonplaceholder.typicode.com/posts/1")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            exitProcess(1)
-        }
-        println(Json.encodeToString(UserArticle.serializer(), userArticle))
-
-        val userArticleHttps: UserArticle = try {
-            client.get("https://jsonplaceholder.typicode.com/posts/1")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            exitProcess(1)
-        }
-        println(Json.encodeToString(UserArticle.serializer(), userArticleHttps))
-    }
+    client.use { test(it) }
+    test(client)
 }
 
+suspend fun withCurlClient() {
+    // https://ktor.io/docs/http-client-engines.html
+    val client = HttpClient(Curl) {
+        install(JsonFeature) {
+            serializer = KotlinxSerializer()
+        }
+    }
+    client.use { test(it) }
+}
 
+suspend fun test(client: HttpClient) {
+    // HTTP
+    val userArticle: UserArticle = try {
+        // https://jsonplaceholder.typicode.com/
+        client.get("http://jsonplaceholder.typicode.com/posts/1")
+    } catch (e: Exception) {
+        e.printStackTrace()
+        exitProcess(1)
+    }
+    println(Json.encodeToString(UserArticle.serializer(), userArticle))
+
+    // HTTPS
+    val userArticleHttps: UserArticle = try {
+        client.get("https://jsonplaceholder.typicode.com/posts/1")
+    } catch (e: Exception) {
+        e.printStackTrace()
+        exitProcess(1)
+    }
+    println(Json.encodeToString(UserArticle.serializer(), userArticleHttps))
+}

@@ -15,6 +15,7 @@ repositories {
 
 kotlin {
     val nativeTarget = macosX64("native")
+//    val nativeTarget = linuxX64("native")
 
     nativeTarget.apply {
         compilations.all {
@@ -37,6 +38,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
                 implementation("io.ktor:ktor-network-tls:$ktorVersion")
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
