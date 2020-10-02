@@ -1,4 +1,5 @@
 val ktor_version: String by project
+val ideaActive: Boolean by project.extra
 
 plugins {
     kotlin("multiplatform") version "1.4.10"
@@ -14,12 +15,37 @@ repositories {
 }
 
 kotlin {
-    val nativeTarget = macosX64("native")
-//    val nativeTarget = linuxX64("native")
+    val nativeTarget = when (System.getProperty("os.name")) {
+        "Mac OS X" -> macosX64("native")
+        "Linux" -> linuxX64("native")
+        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+    }
 
     nativeTarget.apply {
-        compilations.all {
-            kotlinOptions.verbose = true
+        compilations {
+            all {
+                kotlinOptions.verbose = true
+            }
+            getByName("main") {
+                @Suppress("UNUSED_VARIABLE")
+                val libcurl by cinterops.creating {
+                    defFile = File(projectDir, "src/nativeMain/interop/libcurl.def")
+                    includeDirs.headerFilterOnly(
+                        listOf(
+                            "/opt/local/include/curl",
+                            "/usr/local/include/curl",
+                            "/usr/include/curl",
+                            "/usr/local/opt/curl/include/curl",
+                            "/usr/include/x86_64-linux-gnu/curl",
+                            "/usr/lib/x86_64-linux-gnu/curl",
+                            "/usr/local/Cellar/curl/7.62.0/include/curl",
+                            "/usr/local/Cellar/curl/7.63.0/include/curl",
+                            "/usr/local/Cellar/curl/7.65.3/include/curl",
+                            "/usr/local/Cellar/curl/7.66.0/include/curl"
+                        )
+                    )
+                }
+            }
         }
         binaries {
             executable {
@@ -30,6 +56,9 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.useExperimentalAnnotation("kotlin.ExperimentalStdlibApi")
+        }
         val ktorVersion = "1.4.1"
 
         @kotlin.Suppress("UNUSED_VARIABLE")
@@ -51,6 +80,17 @@ kotlin {
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
             }
         }
+
+        // Hack: register the Native interop klibs as outputs of Kotlin source sets:
+//        if (System.getProperty("idea.active") == "true") {
+//            val libcurlInterop by creating
+//            getByName("nativeMain").dependsOn(libcurlInterop)
+//            apply(from = "$rootDir/gradle/interop-as-source-set-klib.gradle")
+//            (project.ext.get("registerInteropAsSourceSetOutput") as groovy.lang.Closure<*>).invoke(
+//                "libcurl",
+//                libcurlInterop
+//            )
+//        }
     }
 }
 
