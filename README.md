@@ -12,19 +12,21 @@ brew install curl
 ```
 
 ### on Amazon Linux 2 on Docker
-#### install libcurl
 ```sh
 # on host
-docker run -itd amazonlinux:latext /bin/sh
+docker run --memory=4g -itd amazonlinux:latext /bin/sh
 docker exec -it $(docker ps | grep 'amazonlinux' | awk '{print $1}') /bin/bash
 ```
 
-```sh
-# on container
-yum install libcurl-devel openssl-devel
-```
+#### Note.
+Docker for Mac restricts memory 2GB, but compiling kotlin native takes much memory.
+If compiler raises 137 error, it may occur OOME.
+If it occurs, you should configure memory size.
 
-#### install gradle
+![change memory size from 2G to 3G]( ./doc/assets/allocate-more-memory.png )
+
+
+#### install libcurl and gradle
 ```sh
 # on container
 amazon-linux-extras enable corretto8
