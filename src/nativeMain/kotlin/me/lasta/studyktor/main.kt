@@ -30,6 +30,7 @@ fun main() = runBlocking {
 @KtorExperimentalAPI
 suspend fun withCioClient() {
     // https://ktor.io/docs/http-client-engines.html
+    println("[INFO]: this is CIO client")
     val client = HttpClient(CIO) {
         install(JsonFeature) {
             serializer = KotlinxSerializer()
@@ -52,6 +53,7 @@ suspend fun withCioClient() {
 
 suspend fun withCurlClient() {
     // https://ktor.io/docs/http-client-engines.html
+    println("[INFO]: this is CUrl client")
     val client = HttpClient(Curl) {
         install(JsonFeature) {
             serializer = KotlinxSerializer()
